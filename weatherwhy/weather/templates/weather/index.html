@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}
+Home Page
+{% endblock %}
+{% block content %}
+<div class="py-5 text-center container-md">
+    <form class="d-flex" method="post">
+        {% csrf_token %}
+        {{ form }}
+        <button class="btn btn-outline-success" type="submit">Enter</button>
+    </form>
+
+
+    <div class="py-5 row row-cols-1 row-cols-md-3 mb-3 text-center">
+        <div class="col">
+            <div class="card mb-4 rounded-3 shadow-sm border">
+                <div class="card-header py-3 text-bg border bg-color-e3f2fd">
+                    <h4 class="my-0 fw-normal">{{ city }}</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mt-3 mb-4">
+                        <li>Description: {{ description }}</li>
+                        <li>Temp: {{ temp }}</li>
+                    </ul>
+                    <img src="https://openweathermap.org/img/w/{{ icon }}.png" width="100px" alt="">
+                </div>
+                <div>
+
+                    {% if request.user.is_authenticated %}
+                    <form method="post" action="{% url 'add_city' %}">
+                        {% csrf_token %}
+                        <button id="city_title" name="city_title" value="{{ city }}" class="btn btn-add-city"
+                                type="submit">Add city
+                        </button>
+                    </form>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="py-5 row row-cols-1 row-cols-md-3 mb-3 text-center">
+        {% for city in cities %}
+        <div class="col">
+            <div class="card mb-4 rounded-3 shadow-sm border">
+                <div class="card-header py-3 text-bg border bg-color-e3f2fd">
+                    <h4 class="my-0 fw-normal">{{ city.city }}</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mt-3 mb-4">
+                        <li>Description: {{ city.description }}</li>
+                        <li>Temp: {{ city.temp }}</li>
+                    </ul>
+                    <img src="https://openweathermap.org/img/w/{{ city.icon }}.png" width="100px" alt="">
+                </div>
+                <div>
+                    {% if request.user.is_authenticated %}
+                    <form method="post" action="{% url 'remove_city' %}">
+                        {% csrf_token %}
+                        <button id="city_remove" name="city_remove" value="{{ city.city }}" class="btn btn-add-city"
+                                type="submit">Remove
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}
