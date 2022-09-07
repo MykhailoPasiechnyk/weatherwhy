@@ -1,1 +1,1 @@
-web:gunicorn weatherwhy.wsgi
+web:gunicorn config.wsgi
