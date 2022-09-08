@@ -51,7 +51,7 @@ jobs:
         DB_HOST: ${{ secrets.DB_HOST }}
         DB_PORT: ${{ secrets.DB_PORT }}
         DB_ENGINE: ${{ secrets.DB_ENGINE }}
+        LANGUAGE_CODE: ${{ secrets.LANGUAGE_CODE }}
 
       run: |
-        python manage.py migrate
         python manage.py test
