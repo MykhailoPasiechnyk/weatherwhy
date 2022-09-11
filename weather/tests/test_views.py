@@ -69,6 +69,12 @@ class RemoveCityTest(TestCase):
         resp = self.client.get(reverse('remove_city'))
         self.assertEqual(resp.status_code, 302)
 
+    @patch('weather.service.WeatherService.get_weather_context', lambda x: {
+        'city': 'City Name',
+        'description': 'Weather description',
+        'icon': 'default icon',
+        'temp': 'Temperature',
+    })
     def test_redirect_to_home(self):
         resp = self.client.get(reverse('remove_city'))
         self.assertRedirects(resp, reverse('home'), status_code=302)
@@ -79,6 +85,12 @@ class RemoveCityTest(TestCase):
         self.assertEqual(City.objects.all().count(), 0)
         self.assertRedirects(resp, reverse('home'), status_code=302)
 
+    @patch('weather.service.WeatherService.get_weather_context', lambda x: {
+        'city': 'City Name',
+        'description': 'Weather description',
+        'icon': 'default icon',
+        'temp': 'Temperature',
+    })
     def test_if_not_city_remove_in_post(self):
         self.client.login(username='test', password='12345')
         resp = self.client.post(reverse('remove_city'))
