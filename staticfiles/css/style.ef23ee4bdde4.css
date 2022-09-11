@@ -1,0 +1,24 @@
+body{
+    background-color: #fff;
+}
+
+.bg-color-e3f2fd{
+    background-color: #e3f2fd;
+}
+
+.navbar{
+    background-color: #e3f2fd;
+}
+
+.btn-add-city{
+    border-color: #e3f2fd;
+    border: 0px;
+    background-color: #f0f0f0;
+    width: 100%;
+    border-radius: 0;
+}
+
+.btn-add-city:hover{
+    background-color: #e3f2fd;
+    color: black;
+}
