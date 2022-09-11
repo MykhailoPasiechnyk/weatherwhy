@@ -1,8 +1,12 @@
 from django.test import TestCase
 from django.contrib.messages import get_messages
 from django.urls import reverse
-from weather.models import City
 from django.contrib.auth.models import User
+
+from weather.models import City
+
+from unittest.mock import patch
+from weather.service import WeatherService
 
 
 class IndexTest(TestCase):
@@ -35,6 +39,13 @@ class AddCityTest(TestCase):
         resp = self.client.get(reverse('add_city'))
         self.assertRedirects(resp, reverse('home'), status_code=302)
 
+    # TODO: change get weather_context
+    @patch('weather.service.WeatherService.get_weather_context', lambda x: {
+        'city': 'City Name',
+        'description': 'Weather description',
+        'icon': 'default icon',
+        'temp': 'Temperature',
+    })
     def test_if_city_title_in_post(self):
         self.client.login(username='test', password='12345')
         resp = self.client.post(reverse('add_city'), data={'city_title': 'Krakow'})
