@@ -6,7 +6,6 @@ from django.contrib.auth.models import User
 from weather.models import City
 
 from unittest.mock import patch
-from weather.service import WeatherService
 
 
 class IndexTest(TestCase):
@@ -31,6 +30,9 @@ class AddCityTest(TestCase):
         test_user = User.objects.create_user(username='test', password='12345')
         test_user.save()
 
+    def setUp(self) -> None:
+        self.client.login(username='test', password='12345')
+
     def test_status_code_302(self):
         resp = self.client.get(reverse('add_city'))
         self.assertEqual(resp.status_code, 302)
@@ -47,7 +49,6 @@ class AddCityTest(TestCase):
         'temp': 'Temperature',
     })
     def test_if_city_title_in_post(self):
-        self.client.login(username='test', password='12345')
         resp = self.client.post(reverse('add_city'), data={'city_title': 'Krakow'})
         self.assertEqual(City.objects.all().count(), 1)
         self.assertRedirects(resp, reverse('home'), status_code=302)
@@ -65,6 +66,9 @@ class RemoveCityTest(TestCase):
         test_user.save()
         City.objects.create(title='Test')
 
+    def setUp(self) -> None:
+        self.client.login(username='test', password='12345')
+
     def test_status_code_302(self):
         resp = self.client.get(reverse('remove_city'))
         self.assertEqual(resp.status_code, 302)
@@ -80,13 +84,11 @@ class RemoveCityTest(TestCase):
         self.assertRedirects(resp, reverse('home'), status_code=302)
 
     def test_if_city_remove_in_post(self):
-        self.client.login(username='test', password='12345')
         resp = self.client.post(reverse('remove_city'), data={'city_remove': 'Test'})
         self.assertEqual(City.objects.all().count(), 0)
         self.assertRedirects(resp, reverse('home'), status_code=302)
 
     def test_if_not_city_remove_in_post(self):
-        self.client.login(username='test', password='12345')
         resp = self.client.post(reverse('remove_city'))
         self.assertEqual(City.objects.all().count(), 1)
         self.assertRedirects(resp, reverse('home'), status_code=302)
