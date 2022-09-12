@@ -2,21 +2,16 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
 
 from .models import City
 from .service import WeatherService
 from .forms import CitySearchForm, UserRegisterForm, UserLoginForm
+from .exceptions import TitleCityException
 
 
 def index(request):
-    context = WeatherService.get_weather_context('')
-    context['form'] = CitySearchForm()
-
-    if request.method == 'POST':
-        form = CitySearchForm(request.POST)
-        if 'city_name' in request.POST and form.is_valid():
-            context.update(WeatherService.get_weather_context(form.cleaned_data['city_name']))
-            context['form'] = form
+    context = {'form': CitySearchForm()}
 
     cities = City.objects.filter(users=request.user.id)
     context['cities'] = []
@@ -25,6 +20,21 @@ def index(request):
         context['cities'].append(WeatherService.get_weather_context(city.title))
 
     return render(request, 'weather/index.html', context)
+
+
+@require_http_methods(['GET', 'POST'])
+def search(request):
+    context = {'form': CitySearchForm()}
+    if request.method == 'POST':
+        form = CitySearchForm(request.POST)
+        context['form'] = form
+        if form.is_valid():
+            try:
+                context.update(WeatherService.get_weather_context(form.cleaned_data['city_name']))
+            except TitleCityException:
+                messages.error(request, f"Failed name: {form.cleaned_data['city_name']}, try another city name ")
+
+    return render(request, 'weather/search.html', context)
 
 
 @login_required(login_url='/login')
