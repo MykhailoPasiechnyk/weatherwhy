@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
+from django.urls import reverse
 
 from .models import City
 from .service import WeatherService
@@ -26,6 +28,7 @@ def index(request):
     return render(request, 'weather/index.html', context)
 
 
+@login_required(login_url='/login')
 def add_city(request):
     if 'city_title' in request.POST:
         city = City(title=request.POST['city_title'])
@@ -34,6 +37,7 @@ def add_city(request):
     return redirect('home')
 
 
+@login_required(login_url='/login')
 def remove_city(request):
     if 'city_remove' in request.POST:
         city = City.objects.filter(title=request.POST['city_remove'])
