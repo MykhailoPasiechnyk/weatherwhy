@@ -40,9 +40,16 @@ def search(request):
 @login_required(login_url='/login')
 def add_city(request):
     if 'city_title' in request.POST:
-        city = City(title=request.POST['city_title'])
-        city.save()
-        city.users.add(request.user.id)
+        city_title = request.POST['city_title']
+        find_city = City.objects.filter(title=city_title)
+        if not find_city:
+            city = City(title=city_title)
+            city.save()
+            city.users.add(request.user.id)
+        elif request.user not in find_city[0].users.all():
+            find_city[0].users.add(request.user.id)
+        else:
+            messages.success(request, f"You already have: {city_title} in your city list.")
     return redirect('home')
 
 
@@ -50,10 +57,13 @@ def add_city(request):
 def remove_city(request):
     if 'city_remove' in request.POST:
         city = City.objects.filter(title=request.POST['city_remove'])
-        city.delete()
+        city[0].users.remove(request.user.id)
+        if not city[0].users:
+            city.delete()
     return redirect('home')
 
 
+@require_http_methods(['GET', 'POST'])
 def register(request):
     if request.method == 'POST':
         form = UserRegisterForm(data=request.POST)
@@ -68,6 +78,7 @@ def register(request):
     return render(request, 'weather/register.html', {'form': form})
 
 
+@require_http_methods(['GET', 'POST'])
 def user_login(request):
     if request.method == 'POST':
         form = UserLoginForm(data=request.POST)
