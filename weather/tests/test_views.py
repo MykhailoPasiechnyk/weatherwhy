@@ -64,7 +64,8 @@ class RemoveCityTest(TestCase):
     def setUpTestData(cls):
         test_user = User.objects.create_user(username='test', password='12345')
         test_user.save()
-        City.objects.create(title='Test')
+        city = City.objects.create(title='Test')
+        city.users.add(test_user.id)
 
     def setUp(self) -> None:
         self.client.login(username='test', password='12345')
@@ -85,13 +86,12 @@ class RemoveCityTest(TestCase):
 
     def test_if_city_remove_in_post(self):
         resp = self.client.post(reverse('remove_city'), data={'city_remove': 'Test'})
-        self.assertEqual(City.objects.all().count(), 0)
+        self.assertEqual(City.objects.all().count(), 1)
         self.assertRedirects(resp, reverse('home'), status_code=302)
 
     def test_if_not_city_remove_in_post(self):
         resp = self.client.post(reverse('remove_city'))
         self.assertEqual(City.objects.all().count(), 1)
-        self.assertRedirects(resp, reverse('home'), status_code=302)
 
 
 class RegisterTest(TestCase):
