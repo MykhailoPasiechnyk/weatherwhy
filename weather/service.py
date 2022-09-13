@@ -1,4 +1,5 @@
 from django.conf import settings
+from weather.exceptions import TitleCityException
 import requests
 import abc
 
@@ -36,30 +37,18 @@ class WeatherService:
     UNITS = settings.WEATHER_UNITS
 
     @staticmethod
-    def _get_default_context():
-        return {
-            'city': 'City Name',
-            'description': 'Weather description',
-            'icon': 'default icon',
-            'temp': 'Temperature',
-        }
-
-    @staticmethod
     def _get_weather(city_name: str):
         params = WeatherAPIParams.get_params(city_name, WeatherService.API_KEY, WeatherService.UNITS['metric'])
-        return requests.get(url=WeatherService.URL, params=params).json()
+        return requests.get(url=WeatherService.URL, params=params)
 
     @staticmethod
     def get_weather_context(city_name: str) -> dict:
-        if city_name == '':
-            return WeatherService._get_default_context()
-
         response = WeatherService._get_weather(city_name)
 
-        if response['cod'] == '404':
-            return WeatherService._get_default_context()
+        if response.status_code == 404:
+            raise TitleCityException
 
-        weather_city = WeatherCity(response)
+        weather_city = WeatherCity(response.json())
         weather_description = weather_city.get_description()
         weather_icon = weather_city.get_icon_id()
         weather_temp = weather_city.get_temperature()
