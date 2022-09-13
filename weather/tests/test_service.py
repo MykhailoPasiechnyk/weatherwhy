@@ -1,7 +1,7 @@
 from django.test import TestCase
 from weather.service import WeatherAPIParams, WeatherCity, WeatherService
-from unittest.mock import patch
-import json
+from unittest.mock import patch, MagicMock
+from weather.exceptions import TitleCityException
 
 
 class WeatherAPIParamsTest(TestCase):
@@ -36,23 +36,15 @@ class WeatherCityTest(TestCase):
 
 
 class WeatherServiceTest(TestCase):
-    def test_get_default_weather_context(self):
-        self.assertDictEqual(WeatherService.get_weather_context(''), {
-            'city': 'City Name',
-            'description': 'Weather description',
-            'icon': 'default icon',
-            'temp': 'Temperature',
-        })
-
     @patch('weather.service.requests')
     def test_get_weather_context_bad_request(self, requests_mock):
-        requests_mock.get.return_value = {'cod': '404'}
-        self.assertDictEqual(WeatherService.get_weather_context(''), {
-            'city': 'City Name',
-            'description': 'Weather description',
-            'icon': 'default icon',
-            'temp': 'Temperature',
-        })
+        request_response_mock = MagicMock()
+        request_response_mock.status_code = 404
+
+        requests_mock.get.return_value = request_response_mock
+
+        with self.assertRaises(TitleCityException):
+            WeatherService.get_weather_context('')
 
     @patch('weather.service.requests')
     def test_get_weather_context(self, requests_mock):
